@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+    app:
+        build: .
+        restart: always
+        environment:
+            - PORT=8080
+            - DB_HOST=db-app
+            - DB_PORT=7070
+            - TOKEN_HOST=token-app
+            - TOKEN_PORT=9090
+            - SECRET=secret
+        ports:
+            - "8080:8080"
+
+networks:
+    default:
+        name: gokit-crud_network
+        driver: bridge
