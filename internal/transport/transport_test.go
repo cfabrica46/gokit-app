@@ -209,8 +209,9 @@ func TestDecodeRequestWithHeader(t *testing.T) {
 			t.Parallel()
 
 			var resultErr string
+			var r any
 
-			r, err := service.DecodeRequestWithHeader(tt.inType)(context.TODO(), tt.in)
+			r, err = service.DecodeRequestWithHeader(tt.inType)(context.TODO(), tt.in)
 			if err != nil {
 				resultErr = err.Error()
 			}

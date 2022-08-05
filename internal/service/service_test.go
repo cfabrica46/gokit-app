@@ -233,7 +233,8 @@ func TestSignUp(t *testing.T) {
 			var resultErr error
 			var tokenResponse, errorResponse string
 
-			var respFunc func(*http.Request) (*http.Response, error)
+			// var respFunc func(*http.Request) (*http.Response, error)
+			var mockHTTP *httpMock.MockClient
 
 			if tt.isError {
 				errorResponse = mock.ErrWebServer.Error()
@@ -247,18 +248,18 @@ func TestSignUp(t *testing.T) {
 			}`
 
 			if tt.isError {
-				respFunc = getIsErrorMock(
+				//nolint:bodyclose
+				mockHTTP = httpMock.NewMockClient(getIsErrorMock(
 					tt.isErrorInsideRequest,
 					newErrorHTTPComponets(tt.url, tt.method),
 					responseJSON,
-				)
+				))
 			} else {
-				respFunc = getMock(
+				//nolint:bodyclose
+				mockHTTP = httpMock.NewMockClient(getMock(
 					responseJSON,
-				)
+				))
 			}
-
-			mockHTTP := httpMock.NewMockClient(respFunc)
 
 			svc := service.NewService(
 				mockHTTP,
@@ -373,12 +374,14 @@ func TestSignIn(t *testing.T) {
 			}`
 
 			if tt.isError {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getIsErrorMock(
 					tt.isErrorInsideRequest,
 					newErrorHTTPComponets(tt.url, tt.method),
 					responseJSON,
 				))
 			} else {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getMock(
 					responseJSON,
 				))
@@ -489,12 +492,14 @@ func TestLogOut(t *testing.T) {
 				}`, tt.outCheck)
 
 			if tt.isError {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getIsErrorMock(
 					tt.isErrorInsideRequest,
 					newErrorHTTPComponets(tt.url, tt.method),
 					responseJSON,
 				))
 			} else {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getMock(
 					responseJSON,
 				))
@@ -594,12 +599,14 @@ func TestGetAllUsers(t *testing.T) {
 			}`
 
 			if tt.isError {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getIsErrorMock(
 					tt.isErrorInsideRequest,
 					newErrorHTTPComponets(tt.url, tt.method),
 					responseJSON,
 				))
 			} else {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getMock(
 					responseJSON,
 				))
@@ -661,12 +668,14 @@ func TestProfile(t *testing.T) {
 				}`, tt.outCheck)
 
 			if tt.isError {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getIsErrorMock(
 					tt.isErrorInsideRequest,
 					newErrorHTTPComponets(tt.url, tt.method),
 					responseJSON,
 				))
 			} else {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getMock(
 					responseJSON,
 				))
@@ -799,12 +808,14 @@ func TestDeleteAccount(t *testing.T) {
 				}`, tt.outCheck)
 
 			if tt.isError {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getIsErrorMock(
 					tt.isErrorInsideRequest,
 					newErrorHTTPComponets(tt.url, tt.method),
 					responseJSON,
 				))
 			} else {
+				//nolint:bodyclose
 				mockHTTP = httpMock.NewMockClient(getMock(
 					responseJSON,
 				))
@@ -831,7 +842,7 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func getMock(jsonResponse string) func(*http.Request) (*http.Response, error) {
-	return func(r *http.Request) (*http.Response, error) {
+	return func(_ *http.Request) (resp *http.Response, err error) {
 		return &http.Response{
 			Body: io.NopCloser(strings.NewReader(jsonResponse)),
 		}, nil
@@ -844,8 +855,8 @@ func getIsErrorMock(
 	errorHTTPComponents errorHTTPComponents,
 	jsonResponse string,
 ) func(*http.Request) (*http.Response, error) {
-	return func(r *http.Request) (*http.Response, error) {
-		if r.URL.String() == errorHTTPComponents.errorURL && r.Method == errorHTTPComponents.errorMethod {
+	return func(req *http.Request) (resp *http.Response, err error) {
+		if req.URL.String() == errorHTTPComponents.errorURL && req.Method == errorHTTPComponents.errorMethod {
 			if isErrorInsideRequest {
 				return &http.Response{
 					Body: io.NopCloser(bytes.NewReader([]byte(`{

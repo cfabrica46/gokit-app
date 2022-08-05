@@ -18,13 +18,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	nameErrorRequest string = "ErrorRequest"
-)
-
 type incorrectRequest struct {
 	incorrect bool
 }
+
+const (
+	nameErrorRequest string = "ErrorRequest"
+)
 
 func TestSignUpEndpoint(t *testing.T) {
 	t.Parallel()

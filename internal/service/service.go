@@ -9,12 +9,6 @@ import (
 	"app/internal/petition"
 )
 
-var (
-	ErrResponse      = errors.New("error to response")
-	ErrTokenNotValid = errors.New("token not validate")
-	ErrWebServer     = errors.New("error from web server")
-)
-
 type InfoServices struct {
 	DBHost    string
 	DBPort    string
@@ -37,6 +31,12 @@ type service struct {
 	client                    petition.HTTPClient
 	dbHost, tokenHost, secret string
 }
+
+var (
+	ErrResponse      = errors.New("error to response")
+	ErrTokenNotValid = errors.New("token not validate")
+	ErrWebServer     = errors.New("error from web server")
+)
 
 // NewService ...
 func NewService(client petition.HTTPClient, is *InfoServices) *service {
