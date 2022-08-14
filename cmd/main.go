@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"app/cmd/config"
 	"app/internal/endpoint"
 	"app/internal/entity"
 	"app/internal/service"
@@ -12,14 +13,15 @@ import (
 
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	log.SetFlags(log.Lshortfile)
 
-	if err := godotenv.Load(".env"); err != nil {
-		log.Println(".env loaded")
+	if !config.VerifyIsDockerRun() {
+		if err := config.LoadEnv("./config/.env"); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	infServ := service.InfoServices{
